@@ -145,6 +145,22 @@ html, body {
   to { opacity: 1; }
 }
 
+/* 大饼特殊发现动画 */
+.item.found-dabing {
+  z-index: 200;
+  animation: dabingBounce 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes dabingBounce {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  25% { transform: translate(-50%, -50%) scale(1.8); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+  75% { transform: translate(-50%, -50%) scale(1.5); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+.item.found-dabing .item-photo {
+  box-shadow: 0 0 3vmin rgba(255,224,102,0.8), 0 0 6vmin rgba(255,179,71,0.4);
+}
+
 /* 照片物品 */
 .item-photo {
   display: block;
@@ -601,6 +617,18 @@ html, body {
     });
   }
 
+  function playDabingSound() {
+    if (!soundEnabled) return;
+    ensureAudio();
+    var t = audioCtx.currentTime;
+    // 更欢快的上行fanfare: C5 E5 G5 C6 E6
+    playTone(523.25, t, 0.15, 0.22);
+    playTone(659.25, t + 0.1, 0.15, 0.22);
+    playTone(783.99, t + 0.2, 0.15, 0.24);
+    playTone(1046.5, t + 0.3, 0.2, 0.26);
+    playTone(1318.5, t + 0.42, 0.45, 0.26);
+  }
+
   function speakEnglish(text) {
     if (!soundEnabled) return;
     if (!('speechSynthesis' in window)) return;
@@ -610,6 +638,18 @@ html, body {
     utter.rate = 0.8;
     utter.pitch = 1.1;
     utter.volume = 0.9;
+    window.speechSynthesis.speak(utter);
+  }
+
+  function speakChinese(text) {
+    if (!soundEnabled) return;
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    var utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'zh-CN';
+    utter.rate = 0.9;
+    utter.pitch = 1.2;
+    utter.volume = 1.0;
     window.speechSynthesis.speak(utter);
   }
 
@@ -682,22 +722,35 @@ html, body {
 
     const si = sceneItems[idx];
     const el = si.el;
-    el.classList.add('found');
+    const isDabing = !!si.data.photo;
 
-    // 名称标签（中文 + 英文）
+    if (isDabing) {
+      el.classList.add('found-dabing');
+    } else {
+      el.classList.add('found');
+    }
+
+    // 名称标签
     const label = document.createElement('div');
     label.className = 'item-label';
-    label.textContent = si.data.name + ' ' + si.data.en;
+    label.textContent = isDabing ? '找到大饼啦！' : (si.data.name + ' ' + si.data.en);
     el.appendChild(label);
 
-    // 星星粒子
-    spawnStars(el);
+    // 星星粒子（大饼用更多、更丰富的粒子）
+    if (isDabing) {
+      spawnStars(el, 14, ['⭐', '💛', '❤️', '🌟', '✨', '💫', '🎉', '🥳']);
+    } else {
+      spawnStars(el, 8, ['⭐', '✨', '🌟', '💫']);
+    }
 
-    // 音效
-    playDiscoverSound();
-
-    // 英文语音朗读
-    setTimeout(function() { speakEnglish(si.data.en); }, 300);
+    // 音效 + 语音
+    if (isDabing) {
+      playDabingSound();
+      setTimeout(function() { speakChinese('找到大饼啦'); }, 400);
+    } else {
+      playDiscoverSound();
+      setTimeout(function() { speakEnglish(si.data.en); }, 300);
+    }
 
     // 更新收集栏
     const slot = collectBar.children[idx];
@@ -728,17 +781,18 @@ html, body {
     }
   }
 
-  function spawnStars(el) {
+  function spawnStars(el, count, emojis) {
+    count = count || 8;
+    emojis = emojis || ['⭐', '✨', '🌟', '💫'];
     const rect = el.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-    const emojis = ['⭐', '✨', '🌟', '💫'];
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < count; i++) {
       const star = document.createElement('div');
       star.className = 'star-particle';
       star.textContent = emojis[i % emojis.length];
-      const angle = (i / 8) * Math.PI * 2;
+      const angle = (i / count) * Math.PI * 2;
       const dist = 12; // vmin
       const tx = cx + Math.cos(angle) * (dist * Math.min(window.innerWidth, window.innerHeight) / 100);
       const ty = cy + Math.sin(angle) * (dist * Math.min(window.innerWidth, window.innerHeight) / 100);
@@ -772,6 +826,41 @@ html, body {
     });
   }
 
+  // ====== 位置随机化 ======
+  function randomizePositions(items) {
+    var OFFSET = 7; // 最大偏移 ±7%
+    var MIN_DIST = 14; // 最小间距 14%
+    var result = items.map(function(item) {
+      return {
+        x: item.x + (Math.random() - 0.5) * OFFSET * 2,
+        y: item.y + (Math.random() - 0.5) * OFFSET * 2
+      };
+    });
+    // 边界钳制（避开顶部收集栏和边缘）
+    result.forEach(function(p) {
+      p.x = Math.max(12, Math.min(88, p.x));
+      p.y = Math.max(22, Math.min(85, p.y));
+    });
+    // 碰撞检测：如果两个物品太近，微调
+    for (var i = 0; i < result.length; i++) {
+      for (var j = i + 1; j < result.length; j++) {
+        var dx = result[i].x - result[j].x;
+        var dy = result[i].y - result[j].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < MIN_DIST) {
+          // 沿两者连线方向推开
+          var push = (MIN_DIST - dist) / 2 + 1;
+          var angle = Math.atan2(dy, dx);
+          result[i].x = Math.max(12, Math.min(88, result[i].x + Math.cos(angle) * push));
+          result[i].y = Math.max(22, Math.min(85, result[i].y + Math.sin(angle) * push));
+          result[j].x = Math.max(12, Math.min(88, result[j].x - Math.cos(angle) * push));
+          result[j].y = Math.max(22, Math.min(85, result[j].y - Math.sin(angle) * push));
+        }
+      }
+    }
+    return result;
+  }
+
   // ====== 场景管理 ======
   function loadScene(idx) {
     isPlaying = false;
@@ -803,7 +892,8 @@ html, body {
       itemsLayer.appendChild(el);
     });
 
-    // 隐藏物品
+    // 隐藏物品（位置随机化）
+    var positions = randomizePositions(scene.items);
     scene.items.forEach(function(item, i) {
       const el = document.createElement('div');
       el.className = 'item';
@@ -816,10 +906,10 @@ html, body {
       } else {
         el.textContent = item.emoji;
       }
-      el.style.left = item.x + '%';
-      el.style.top = item.y + '%';
+      el.style.left = positions[i].x + '%';
+      el.style.top = positions[i].y + '%';
       itemsLayer.appendChild(el);
-      sceneItems.push({ el: el, data: item });
+      sceneItems.push({ el: el, data: { ...item, x: positions[i].x, y: positions[i].y } });
     });
 
     // 场景介绍

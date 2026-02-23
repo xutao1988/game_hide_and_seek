@@ -174,15 +174,15 @@ html, body {
   position: absolute;
   top: 2vmin; left: 50%;
   transform: translateX(-50%);
-  display: flex; gap: 3vmin;
+  display: flex; gap: 2vmin;
   z-index: 300;
 }
 .slot {
-  width: 12vmin; height: 12vmin;
-  border: 0.5vmin dashed rgba(255,255,255,0.5);
+  width: 10vmin; height: 10vmin;
+  border: 0.4vmin dashed rgba(255,255,255,0.5);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 7vmin;
+  font-size: 6vmin;
   background: rgba(0,0,0,0.3);
   transition: all 0.4s;
 }
@@ -375,75 +375,80 @@ html, body {
       name: '卧室', icon: '🏠',
       bg: 'linear-gradient(180deg, #1a1433 0%, #2d1f4e 40%, #3d2a5c 100%)',
       items: [
-        { emoji: '🧸', name: '小熊', x: 25, y: 45 },
-        { emoji: '🌙', name: '月亮', x: 72, y: 30 },
-        { emoji: '⭐', name: '星星', x: 55, y: 70 }
+        { emoji: '🧸', name: '小熊', en: 'Bear', x: 20, y: 40 },
+        { emoji: '🌙', name: '月亮', en: 'Moon', x: 75, y: 28 },
+        { emoji: '⭐', name: '星星', en: 'Star', x: 50, y: 65 },
+        { emoji: '🔔', name: '铃铛', en: 'Bell', x: 80, y: 72 },
+        { emoji: '🧦', name: '袜子', en: 'Sock', x: 30, y: 78 }
       ],
       decos: [
-        { emoji: '🛏️', x: 50, y: 82 },
-        { emoji: '🪟', x: 80, y: 25 },
-        { emoji: '🕯️', x: 15, y: 72 },
-        { emoji: '📚', x: 85, y: 65 }
+        { emoji: '🛏️', x: 50, y: 88 },
+        { emoji: '🪟', x: 88, y: 22 },
+        { emoji: '🕯️', x: 12, y: 60 }
       ]
     },
     {
       name: '花园', icon: '🌳',
       bg: 'linear-gradient(180deg, #0a2a1a 0%, #1a3d2a 40%, #2a4d3a 100%)',
       items: [
-        { emoji: '🦋', name: '蝴蝶', x: 30, y: 38 },
-        { emoji: '🐞', name: '瓢虫', x: 68, y: 65 },
-        { emoji: '🌻', name: '向日葵', x: 48, y: 52 }
+        { emoji: '🦋', name: '蝴蝶', en: 'Butterfly', x: 25, y: 35 },
+        { emoji: '🐞', name: '瓢虫', en: 'Ladybug', x: 72, y: 62 },
+        { emoji: '🌻', name: '向日葵', en: 'Sunflower', x: 50, y: 48 },
+        { emoji: '🐝', name: '蜜蜂', en: 'Bee', x: 78, y: 30 },
+        { emoji: '🍓', name: '草莓', en: 'Strawberry', x: 22, y: 75 }
       ],
       decos: [
-        { emoji: '🌷', x: 18, y: 75 },
-        { emoji: '🌿', x: 82, y: 40 },
-        { emoji: '🍄', x: 35, y: 80 },
-        { emoji: '🪴', x: 75, y: 78 }
+        { emoji: '🌷', x: 15, y: 55 },
+        { emoji: '🌿', x: 85, y: 45 },
+        { emoji: '🍄', x: 42, y: 85 }
       ]
     },
     {
       name: '动物园', icon: '🦁',
       bg: 'linear-gradient(180deg, #2a1f0a 0%, #3d2f1a 40%, #4d3f2a 100%)',
       items: [
-        { emoji: '🦁', name: '狮子', x: 22, y: 55 },
-        { emoji: '🐘', name: '大象', x: 70, y: 42 },
-        { emoji: '🐵', name: '猴子', x: 50, y: 68 }
+        { emoji: '🦁', name: '狮子', en: 'Lion', x: 20, y: 50 },
+        { emoji: '🐘', name: '大象', en: 'Elephant', x: 75, y: 38 },
+        { emoji: '🐵', name: '猴子', en: 'Monkey', x: 48, y: 68 },
+        { emoji: '🦒', name: '长颈鹿', en: 'Giraffe', x: 30, y: 28 },
+        { emoji: '🐼', name: '熊猫', en: 'Panda', x: 78, y: 75 }
       ],
       decos: [
-        { emoji: '🌴', x: 12, y: 35 },
-        { emoji: '🎋', x: 88, y: 55 },
-        { emoji: '🪨', x: 40, y: 85 },
-        { emoji: '🦜', x: 78, y: 25 }
+        { emoji: '🌴', x: 10, y: 35 },
+        { emoji: '🪨', x: 55, y: 88 },
+        { emoji: '🦜', x: 88, y: 22 }
       ]
     },
     {
       name: '海底世界', icon: '🌊',
       bg: 'linear-gradient(180deg, #0a1a3d 0%, #0d2a5e 40%, #103a7e 100%)',
       items: [
-        { emoji: '🐟', name: '小鱼', x: 35, y: 42 },
-        { emoji: '🐙', name: '章鱼', x: 65, y: 60 },
-        { emoji: '🐢', name: '海龟', x: 28, y: 72 }
+        { emoji: '🐟', name: '小鱼', en: 'Fish', x: 30, y: 38 },
+        { emoji: '🐙', name: '章鱼', en: 'Octopus', x: 70, y: 55 },
+        { emoji: '🐢', name: '海龟', en: 'Turtle', x: 25, y: 72 },
+        { emoji: '🐬', name: '海豚', en: 'Dolphin', x: 75, y: 28 },
+        { emoji: '🦀', name: '螃蟹', en: 'Crab', x: 52, y: 78 }
       ],
       decos: [
-        { emoji: '🪸', x: 75, y: 80 },
-        { emoji: '🫧', x: 20, y: 30 },
-        { emoji: '🐚', x: 55, y: 85 },
-        { emoji: '🌊', x: 85, y: 35 }
+        { emoji: '🪸', x: 80, y: 82 },
+        { emoji: '🫧', x: 15, y: 30 },
+        { emoji: '🐚', x: 60, y: 90 }
       ]
     },
     {
       name: '农场', icon: '🐄',
       bg: 'linear-gradient(180deg, #1a2a0a 0%, #2a3d1a 40%, #3a4d2a 100%)',
       items: [
-        { emoji: '🐄', name: '奶牛', x: 25, y: 58 },
-        { emoji: '🐔', name: '小鸡', x: 72, y: 48 },
-        { emoji: '🐷', name: '小猪', x: 48, y: 72 }
+        { emoji: '🐄', name: '奶牛', en: 'Cow', x: 22, y: 55 },
+        { emoji: '🐔', name: '小鸡', en: 'Chicken', x: 75, y: 42 },
+        { emoji: '🐷', name: '小猪', en: 'Pig', x: 50, y: 72 },
+        { emoji: '🐑', name: '小羊', en: 'Sheep', x: 28, y: 32 },
+        { emoji: '🐴', name: '马', en: 'Horse', x: 78, y: 75 }
       ],
       decos: [
-        { emoji: '🌾', x: 15, y: 40 },
-        { emoji: '🏡', x: 80, y: 28 },
-        { emoji: '🌽', x: 60, y: 85 },
-        { emoji: '🚜', x: 35, y: 30 }
+        { emoji: '🌾', x: 12, y: 45 },
+        { emoji: '🏡', x: 85, y: 25 },
+        { emoji: '🚜', x: 40, y: 88 }
       ]
     }
   ];
@@ -539,6 +544,18 @@ html, body {
     });
   }
 
+  function speakEnglish(text) {
+    if (!soundEnabled) return;
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    var utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = 0.8;
+    utter.pitch = 1.1;
+    utter.volume = 0.9;
+    window.speechSynthesis.speak(utter);
+  }
+
   function startBgMusic() {
     stopBgMusic();
     if (!soundEnabled) return;
@@ -610,10 +627,10 @@ html, body {
     const el = si.el;
     el.classList.add('found');
 
-    // 名称标签
+    // 名称标签（中文 + 英文）
     const label = document.createElement('div');
     label.className = 'item-label';
-    label.textContent = si.data.name;
+    label.textContent = si.data.name + ' ' + si.data.en;
     el.appendChild(label);
 
     // 星星粒子
@@ -621,6 +638,9 @@ html, body {
 
     // 音效
     playDiscoverSound();
+
+    // 英文语音朗读
+    setTimeout(function() { speakEnglish(si.data.en); }, 300);
 
     // 更新收集栏
     const slot = collectBar.children[idx];

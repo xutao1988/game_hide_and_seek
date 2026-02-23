@@ -60,6 +60,40 @@ html, body {
   50% { transform: rotate(15deg); }
 }
 
+/* ====== 游戏导航 ====== */
+.game-nav {
+  margin-top: 5vmin;
+  width: 80%;
+  max-width: 500px;
+}
+.nav-title {
+  font-size: 3.8vmin; color: #aab;
+  text-align: center;
+  margin-bottom: 2vmin;
+}
+.nav-links {
+  display: flex; flex-wrap: wrap;
+  justify-content: center; gap: 1.5vmin;
+}
+.nav-link {
+  font-size: 3vmin; color: #ccd;
+  text-decoration: none;
+  padding: 1.2vmin 2.5vmin;
+  border-radius: 4vmin;
+  background: rgba(255,255,255,0.08);
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.nav-link:active {
+  transform: scale(0.95);
+  background: rgba(255,255,255,0.15);
+}
+.nav-link.current {
+  background: rgba(255,224,102,0.18);
+  color: #ffe066;
+  pointer-events: none;
+}
+
 /* ====== 游戏容器 ====== */
 #game {
   position: fixed; inset: 0;
@@ -294,6 +328,17 @@ html, body {
   <div class="splash-title">躲猫猫</div>
   <div class="splash-sub">用手电筒找到藏起来的小伙伴</div>
   <button class="splash-btn" id="startBtn">开始探险</button>
+  <div class="game-nav">
+    <div class="nav-title">🎪 大饼游乐场</div>
+    <div class="nav-links">
+      <a class="nav-link" href="https://xutao1988.github.io/game_qiaodishu/">🔨 敲大饼大作战</a>
+      <a class="nav-link" href="https://xutao1988.github.io/game_animal_name/animal-game.html">🦁 识别动物英文名</a>
+      <a class="nav-link" href="https://xutao1988.github.io/game_tank_battle/">🎯 坦克大战</a>
+      <a class="nav-link" href="https://xutao1988.github.io/game_bubble/">🫧 泡泡大作战</a>
+      <a class="nav-link" href="https://xutao1988.github.io/game_travel_tools/">🚗 大饼开车啦</a>
+      <a class="nav-link current" href="https://xutao1988.github.io/game_hide_and_seek/">🔦 大饼躲猫猫</a>
+    </div>
+  </div>
 </div>
 
 <!-- 游戏 -->

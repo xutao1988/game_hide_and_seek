@@ -621,12 +621,70 @@ html, body {
     if (!soundEnabled) return;
     ensureAudio();
     var t = audioCtx.currentTime;
-    // 更欢快的上行fanfare: C5 E5 G5 C6 E6
-    playTone(523.25, t, 0.15, 0.22);
-    playTone(659.25, t + 0.1, 0.15, 0.22);
-    playTone(783.99, t + 0.2, 0.15, 0.24);
-    playTone(1046.5, t + 0.3, 0.2, 0.26);
-    playTone(1318.5, t + 0.42, 0.45, 0.26);
+    // 温暖的和弦铺底（持续音）
+    var pad = audioCtx.createOscillator();
+    var padGain = audioCtx.createGain();
+    pad.type = 'sine';
+    pad.frequency.value = 261.63; // C4
+    padGain.gain.setValueAtTime(0.08, t);
+    padGain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+    pad.connect(padGain); padGain.connect(audioCtx.destination);
+    pad.start(t); pad.stop(t + 1.2);
+    // 欢快上行fanfare: C5 E5 G5 C6，最后一个音长一些
+    playTone(523.25, t, 0.18, 0.2);
+    playTone(659.25, t + 0.12, 0.18, 0.22);
+    playTone(783.99, t + 0.24, 0.18, 0.24);
+    playTone(1046.5, t + 0.38, 0.5, 0.26);
+    // 高音点缀（八度泛音）
+    var shimmer = audioCtx.createOscillator();
+    var shimGain = audioCtx.createGain();
+    shimmer.type = 'sine';
+    shimmer.frequency.value = 2093; // C7
+    shimGain.gain.setValueAtTime(0.04, t + 0.38);
+    shimGain.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+    shimmer.connect(shimGain); shimGain.connect(audioCtx.destination);
+    shimmer.start(t + 0.38); shimmer.stop(t + 0.9);
+  }
+
+  // ====== 语音系统（自动选择最佳声音） ======
+  var bestVoiceZH = null;
+  var bestVoiceEN = null;
+
+  function cacheVoices() {
+    if (!('speechSynthesis' in window)) return;
+    var voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return;
+
+    // 中文语音：优先 Enhanced/Premium，然后 zh-CN
+    var zhVoices = voices.filter(function(v) { return v.lang.indexOf('zh') === 0; });
+    var preferred = zhVoices.filter(function(v) {
+      var n = v.name.toLowerCase();
+      return n.indexOf('enhanced') !== -1 || n.indexOf('premium') !== -1;
+    });
+    if (preferred.length) {
+      // 偏好 zh-CN 的增强语音
+      bestVoiceZH = preferred.filter(function(v) { return v.lang.indexOf('CN') !== -1; })[0] || preferred[0];
+    } else {
+      bestVoiceZH = zhVoices.filter(function(v) { return v.lang.indexOf('CN') !== -1; })[0] || zhVoices[0] || null;
+    }
+
+    // 英文语音：优先 Enhanced/Premium，然后 en-US
+    var enVoices = voices.filter(function(v) { return v.lang.indexOf('en') === 0; });
+    var enPref = enVoices.filter(function(v) {
+      var n = v.name.toLowerCase();
+      return n.indexOf('enhanced') !== -1 || n.indexOf('premium') !== -1;
+    });
+    if (enPref.length) {
+      bestVoiceEN = enPref.filter(function(v) { return v.lang.indexOf('US') !== -1; })[0] || enPref[0];
+    } else {
+      bestVoiceEN = enVoices.filter(function(v) { return v.lang.indexOf('US') !== -1; })[0] || enVoices[0] || null;
+    }
+  }
+
+  // 语音列表可能异步加载
+  if ('speechSynthesis' in window) {
+    cacheVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', cacheVoices);
   }
 
   function speakEnglish(text) {
@@ -634,6 +692,7 @@ html, body {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     var utter = new SpeechSynthesisUtterance(text);
+    if (bestVoiceEN) utter.voice = bestVoiceEN;
     utter.lang = 'en-US';
     utter.rate = 0.8;
     utter.pitch = 1.1;
@@ -646,9 +705,10 @@ html, body {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     var utter = new SpeechSynthesisUtterance(text);
+    if (bestVoiceZH) utter.voice = bestVoiceZH;
     utter.lang = 'zh-CN';
-    utter.rate = 0.9;
-    utter.pitch = 1.2;
+    utter.rate = 0.85;
+    utter.pitch = 1.3;
     utter.volume = 1.0;
     window.speechSynthesis.speak(utter);
   }
@@ -746,7 +806,7 @@ html, body {
     // 音效 + 语音
     if (isDabing) {
       playDabingSound();
-      setTimeout(function() { speakChinese('找到大饼啦'); }, 400);
+      setTimeout(function() { speakChinese('找到大饼啦'); }, 600);
     } else {
       playDiscoverSound();
       setTimeout(function() { speakEnglish(si.data.en); }, 300);

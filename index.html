@@ -145,6 +145,24 @@ html, body {
   to { opacity: 1; }
 }
 
+/* 照片物品 */
+.item-photo {
+  display: block;
+  width: 14vmin;
+  height: 14vmin;
+  border-radius: 50%;
+  border: 0.6vmin solid #ffe066;
+  box-shadow: 0 0 1.5vmin rgba(255,224,102,0.4);
+  object-fit: cover;
+  pointer-events: none;
+}
+.slot-photo {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 /* 装饰物品 */
 .deco {
   position: absolute;
@@ -174,15 +192,15 @@ html, body {
   position: absolute;
   top: 2vmin; left: 50%;
   transform: translateX(-50%);
-  display: flex; gap: 2vmin;
+  display: flex; gap: 1.5vmin;
   z-index: 300;
 }
 .slot {
-  width: 10vmin; height: 10vmin;
+  width: 9vmin; height: 9vmin;
   border: 0.4vmin dashed rgba(255,255,255,0.5);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 6vmin;
+  font-size: 5.5vmin;
   background: rgba(0,0,0,0.3);
   transition: all 0.4s;
 }
@@ -379,7 +397,8 @@ html, body {
         { emoji: '🌙', name: '月亮', en: 'Moon', x: 75, y: 28 },
         { emoji: '⭐', name: '星星', en: 'Star', x: 50, y: 65 },
         { emoji: '🔔', name: '铃铛', en: 'Bell', x: 80, y: 72 },
-        { emoji: '🧦', name: '袜子', en: 'Sock', x: 30, y: 78 }
+        { emoji: '🧦', name: '袜子', en: 'Sock', x: 30, y: 78 },
+        { photo: 'dabing_7.png', name: '大饼', en: 'Dabing', x: 48, y: 32 }
       ],
       decos: [
         { emoji: '🛏️', x: 50, y: 88 },
@@ -395,12 +414,13 @@ html, body {
         { emoji: '🐞', name: '瓢虫', en: 'Ladybug', x: 72, y: 62 },
         { emoji: '🌻', name: '向日葵', en: 'Sunflower', x: 50, y: 48 },
         { emoji: '🐝', name: '蜜蜂', en: 'Bee', x: 78, y: 30 },
-        { emoji: '🍓', name: '草莓', en: 'Strawberry', x: 22, y: 75 }
+        { emoji: '🍓', name: '草莓', en: 'Strawberry', x: 22, y: 75 },
+        { photo: 'dabing_6.png', name: '大饼', en: 'Dabing', x: 50, y: 80 }
       ],
       decos: [
         { emoji: '🌷', x: 15, y: 55 },
         { emoji: '🌿', x: 85, y: 45 },
-        { emoji: '🍄', x: 42, y: 85 }
+        { emoji: '🍄', x: 42, y: 88 }
       ]
     },
     {
@@ -411,7 +431,8 @@ html, body {
         { emoji: '🐘', name: '大象', en: 'Elephant', x: 75, y: 38 },
         { emoji: '🐵', name: '猴子', en: 'Monkey', x: 48, y: 68 },
         { emoji: '🦒', name: '长颈鹿', en: 'Giraffe', x: 30, y: 28 },
-        { emoji: '🐼', name: '熊猫', en: 'Panda', x: 78, y: 75 }
+        { emoji: '🐼', name: '熊猫', en: 'Panda', x: 78, y: 75 },
+        { photo: 'dabing_3.png', name: '大饼', en: 'Dabing', x: 55, y: 42 }
       ],
       decos: [
         { emoji: '🌴', x: 10, y: 35 },
@@ -427,7 +448,8 @@ html, body {
         { emoji: '🐙', name: '章鱼', en: 'Octopus', x: 70, y: 55 },
         { emoji: '🐢', name: '海龟', en: 'Turtle', x: 25, y: 72 },
         { emoji: '🐬', name: '海豚', en: 'Dolphin', x: 75, y: 28 },
-        { emoji: '🦀', name: '螃蟹', en: 'Crab', x: 52, y: 78 }
+        { emoji: '🦀', name: '螃蟹', en: 'Crab', x: 52, y: 78 },
+        { photo: 'dabing_2.png', name: '大饼', en: 'Dabing', x: 48, y: 48 }
       ],
       decos: [
         { emoji: '🪸', x: 80, y: 82 },
@@ -443,7 +465,8 @@ html, body {
         { emoji: '🐔', name: '小鸡', en: 'Chicken', x: 75, y: 42 },
         { emoji: '🐷', name: '小猪', en: 'Pig', x: 50, y: 72 },
         { emoji: '🐑', name: '小羊', en: 'Sheep', x: 28, y: 32 },
-        { emoji: '🐴', name: '马', en: 'Horse', x: 78, y: 75 }
+        { emoji: '🐴', name: '马', en: 'Horse', x: 78, y: 75 },
+        { photo: 'dabing_5.png', name: '大饼', en: 'Dabing', x: 52, y: 45 }
       ],
       decos: [
         { emoji: '🌾', x: 12, y: 45 },
@@ -645,7 +668,16 @@ html, body {
     // 更新收集栏
     const slot = collectBar.children[idx];
     if (slot) {
-      slot.textContent = si.data.emoji;
+      if (si.data.photo) {
+        var slotImg = document.createElement('img');
+        slotImg.src = si.data.photo;
+        slotImg.className = 'slot-photo';
+        slotImg.draggable = false;
+        slot.textContent = '';
+        slot.appendChild(slotImg);
+      } else {
+        slot.textContent = si.data.emoji;
+      }
       slot.classList.add('filled');
     }
 
@@ -741,7 +773,15 @@ html, body {
     scene.items.forEach(function(item, i) {
       const el = document.createElement('div');
       el.className = 'item';
-      el.textContent = item.emoji;
+      if (item.photo) {
+        var img = document.createElement('img');
+        img.src = item.photo;
+        img.className = 'item-photo';
+        img.draggable = false;
+        el.appendChild(img);
+      } else {
+        el.textContent = item.emoji;
+      }
       el.style.left = item.x + '%';
       el.style.top = item.y + '%';
       itemsLayer.appendChild(el);

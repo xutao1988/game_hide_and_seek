@@ -179,6 +179,16 @@ html, body {
   object-fit: cover;
 }
 
+/* 物品被光照到时微晃动 */
+.item.item-lit {
+  animation: itemWobble 0.5s ease-in-out infinite;
+}
+@keyframes itemWobble {
+  0%,100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  25% { transform: translate(-50%, -50%) rotate(-6deg) scale(1.05); }
+  75% { transform: translate(-50%, -50%) rotate(6deg) scale(1.05); }
+}
+
 /* 装饰物品 */
 .deco {
   position: absolute;
@@ -186,6 +196,32 @@ html, body {
   line-height: 1;
   transform: translate(-50%, -50%);
   opacity: 0.7;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.deco.deco-lit {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* 英文大字展示 */
+.word-flash {
+  position: absolute;
+  top: 45%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14vmin;
+  font-weight: bold;
+  color: #ffe066;
+  text-shadow: 0 0 3vmin rgba(255,224,102,0.6), 0 0.5vmin 1vmin rgba(0,0,0,0.5);
+  z-index: 350;
+  pointer-events: none;
+  animation: wordFlash 2.2s ease-in-out forwards;
+}
+@keyframes wordFlash {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(0.4); }
+  12% { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
+  25% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  75% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(0.8); }
 }
 
 /* 手电筒遮罩 */
@@ -538,6 +574,8 @@ html, body {
   let isPlaying = false;
   let tutorialShown = false;
   let gameStarted = false;
+  let sceneDecos = [];
+  let litDecos = new Set();
 
   // ====== DOM ======
   const splash = document.getElementById('splash');
@@ -594,6 +632,21 @@ html, body {
     gain.connect(audioCtx.destination);
     osc.start(startTime);
     osc.stop(startTime + duration);
+  }
+
+  function playDecoSound() {
+    if (!soundEnabled || !audioCtx) return;
+    var t = audioCtx.currentTime;
+    // 轻柔的木鱼"咚"声
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(350, t);
+    osc.frequency.exponentialRampToValueAtTime(180, t + 0.12);
+    gain.gain.setValueAtTime(0.1, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(t); osc.stop(t + 0.15);
   }
 
   function playDiscoverSound() {
@@ -757,21 +810,52 @@ html, body {
     checkDiscovery(px, py);
   }
 
-  // ====== 发现检测 ======
+  // ====== 发现检测 + 光照反馈 ======
   function checkDiscovery(px, py) {
     if (!isPlaying) return;
-    const vmin = Math.min(window.innerWidth, window.innerHeight);
-    const radius = vmin * 0.15 * 0.7; // 光圈半径 15vmin × 0.7
+    var vmin = Math.min(window.innerWidth, window.innerHeight);
+    var discoverRadius = vmin * 0.15 * 0.7;
+    var lightRadius = vmin * 0.15;
 
+    // 检测隐藏物品：发现 + 光照微晃
     sceneItems.forEach(function(si, idx) {
-      if (foundItems.includes(idx)) return;
-      const rect = si.el.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dist = Math.sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy));
+      if (foundItems.includes(idx)) {
+        si.el.classList.remove('item-lit');
+        return;
+      }
+      var rect = si.el.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var dist = Math.sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy));
 
-      if (dist < radius) {
+      if (dist < discoverRadius) {
+        si.el.classList.remove('item-lit');
         discoverItem(idx);
+      } else if (dist < lightRadius) {
+        si.el.classList.add('item-lit');
+      } else {
+        si.el.classList.remove('item-lit');
+      }
+    });
+
+    // 检测装饰物：进入光圈时播放轻音效
+    sceneDecos.forEach(function(sd, idx) {
+      var rect = sd.el.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var dist = Math.sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy));
+
+      if (dist < lightRadius) {
+        if (!litDecos.has(idx)) {
+          litDecos.add(idx);
+          sd.el.classList.add('deco-lit');
+          playDecoSound();
+        }
+      } else {
+        if (litDecos.has(idx)) {
+          litDecos.delete(idx);
+          sd.el.classList.remove('deco-lit');
+        }
       }
     });
   }
@@ -801,6 +885,15 @@ html, body {
       spawnStars(el, 14, ['⭐', '💛', '❤️', '🌟', '✨', '💫', '🎉', '🥳']);
     } else {
       spawnStars(el, 8, ['⭐', '✨', '🌟', '💫']);
+    }
+
+    // 英文大字展示（大饼除外）
+    if (!isDabing) {
+      var wordEl = document.createElement('div');
+      wordEl.className = 'word-flash';
+      wordEl.textContent = si.data.en;
+      game.appendChild(wordEl);
+      setTimeout(function() { wordEl.remove(); }, 2500);
     }
 
     // 音效 + 语音
@@ -926,11 +1019,13 @@ html, body {
     isPlaying = false;
     foundItems = [];
     sceneItems = [];
+    sceneDecos = [];
+    litDecos = new Set();
 
     // 清空
     itemsLayer.innerHTML = '';
     collectBar.innerHTML = '';
-    document.querySelectorAll('.star-particle, .confetti, .hint-pulse').forEach(function(e) { e.remove(); });
+    document.querySelectorAll('.star-particle, .confetti, .hint-pulse, .word-flash').forEach(function(e) { e.remove(); });
 
     const scene = SCENES[idx];
     sceneBg.style.background = scene.bg;
@@ -950,6 +1045,7 @@ html, body {
       el.style.left = d.x + '%';
       el.style.top = d.y + '%';
       itemsLayer.appendChild(el);
+      sceneDecos.push({ el: el, data: d });
     });
 
     // 隐藏物品（位置随机化）
